@@ -1,5 +1,6 @@
 NGINX access log parser
 ================================
+[![Build Status](https://travis-ci.org/richardasaurus/nginx-access-log-parser.png?branch=master)](https://travis-ci.org/richardasaurus/nginx-access-log-parser)
 
 This python script parses an NGINX access log and counts the total occurrences of a chosen item within the logs and outputs a dictionary.
 
