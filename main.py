@@ -15,11 +15,14 @@ def get_requests(f):
     pat = (r''
            '(\d+.\d+.\d+.\d+)\s-\s-\s' #IP address
            '\[(.+)\]\s' #datetime
-           '"GET\s(.+)\s\w+/.+"\s\d+\s' #requested file
-           '\d+\s"(.+)"\s' #referrer
+           '"GET\s(.+)\s\w+/.+"\s' #requested file
+           '(\d+)\s' #status
+           '(\d+)\s' #bandwidth
+           '"(.+)"\s' #referrer
            '"(.+)"' #user agent
         )
     requests = find(pat, log_line, None)
+    print requests
     return requests
 
 def find(pat, text, match_item):
