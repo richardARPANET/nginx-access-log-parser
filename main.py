@@ -22,7 +22,6 @@ def get_requests(f):
            '"(.+)"' #user agent
         )
     requests = find(pat, log_line, None)
-    print requests
     return requests
 
 def find(pat, text, match_item):
