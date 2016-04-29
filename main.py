@@ -19,15 +19,14 @@ def get_requests(f):
            '\d+\s"(.+)"\s' #referrer
            '"(.+)"' #user agent
         )
-    requests = find(pat, log_line, None)
+    requests = find(pat, log_line)
     return requests
 
-def find(pat, text, match_item):
+def find(pat, text):
     match = re.findall(pat, text)
     if match:
         return match
-    else:
-        return False
+    return False
 
 def get_files(requests):
     #get requested files with req
