@@ -50,7 +50,7 @@ def file_occur(files):
 if __name__ == '__main__':
 
     #nginx access log, standard format
-    log_file = open('/var/log/nginx/access.log', 'r')
+    log_file = open('example.log', 'r')
 
     # return dict of files and total requests
     urls_with_counts = process_log(log_file)
