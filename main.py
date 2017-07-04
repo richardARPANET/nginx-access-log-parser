@@ -7,6 +7,7 @@ from operator import itemgetter
 import datetime
 import matplotlib.pyplot as plt; plt.rcdefaults()
 from datetime import timedelta
+from collections import OrderedDict
 
 def process_log(log):
     requests = get_requests(log)
@@ -51,7 +52,7 @@ def convertStrToDatetime(dtstr):
 def generate_graph_dict(times):
     block = timedelta(minutes=15)
     start = times[0]
-    graphdict = {}
+    graphdict = OrderedDict()
     print start
     for time in times:
         end = start + block
@@ -66,6 +67,11 @@ def generate_graph_dict(times):
 
     return graphdict
         
+def graph(graphdict):
+    x = graphdict.keys()
+    y = graphdict.values()
+    plt.plot(x, y)
+    plt.show()
 
 def get_files(requests):
     #get requested files with req
@@ -96,5 +102,6 @@ if __name__ == '__main__':
     gd = generate_graph_dict(times)
     for k,v in gd.items():
         if(v > 0):
-            #print str(k) + " " + str(v)
-            pass
+            print str(k) + " " + str(v)
+            #pass
+    graph(gd)
