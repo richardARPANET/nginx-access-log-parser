@@ -52,13 +52,18 @@ def generate_graph_dict(times):
     block = timedelta(minutes=15)
     start = times[0]
     graphdict = {}
+    print start
     for time in times:
         end = start + block
-        graphdict[start]=0
         if(time < end):
-            graphdict[start] += 1
+            try:
+                graphdict[start] += 1
+            except:
+                graphdict[start] = 1
         else:
             start = end
+            print start
+
     return graphdict
         
 
@@ -87,7 +92,9 @@ if __name__ == '__main__':
     times = process_log(log_file)
     # sort them by total requests descending
     #sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
-    print(times)
-    for k,v in generate_graph_dict(times).items():
+    #print(times)
+    gd = generate_graph_dict(times)
+    for k,v in gd.items():
         if(v > 0):
-            print str(k) + " " + str(v)
+            #print str(k) + " " + str(v)
+            pass
