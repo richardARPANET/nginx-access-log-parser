@@ -4,11 +4,13 @@ __license__ = "None"
 
 import re
 from operator import itemgetter
+import datetime
 
 def process_log(log):
     requests = get_requests(log)
-    files = get_files(requests)
-    totals = file_occur(files)
+    #files = get_files(requests)
+    #totals = file_occur(files)
+    totals = get_times(requests)
     return totals
 
 def get_requests(f):
@@ -31,6 +33,19 @@ def find(pat, text):
         return match
     return False
 
+def get_times(requests):
+    """
+    return list of times
+    """
+    timelist = []
+    for req in requests:
+        timelist.append(convertStrToDatetime(req[1]))
+    return timelist
+
+def convertStrToDatetime(dtstr):
+    #03/Jul/2017:09:50:05 +1000
+    return datetime.datetime.strptime(dtstr, "%d/%b/%Y:%H:%M:%S +1000")
+
 def get_files(requests):
     #get requested files with req
     requested_files = []
@@ -50,10 +65,10 @@ def file_occur(files):
 if __name__ == '__main__':
 
     #nginx access log, standard format
-    log_file = open('example.log', 'r')
+    log_file = open('access.log', 'r')
 
     # return dict of files and total requests
-    urls_with_counts = process_log(log_file)
+    times = process_log(log_file)
     # sort them by total requests descending
-    sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
-    print(sorted_by_count)
+    #sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
+    print(times)
