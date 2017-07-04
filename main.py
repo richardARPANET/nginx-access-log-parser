@@ -5,6 +5,8 @@ __license__ = "None"
 import re
 from operator import itemgetter
 import datetime
+import matplotlib.pyplot as plt; plt.rcdefaults()
+from datetime import timedelta
 
 def process_log(log):
     requests = get_requests(log)
@@ -46,6 +48,20 @@ def convertStrToDatetime(dtstr):
     #03/Jul/2017:09:50:05 +1000
     return datetime.datetime.strptime(dtstr, "%d/%b/%Y:%H:%M:%S +1000")
 
+def generate_graph_dict(times):
+    block = timedelta(minutes=15)
+    start = times[0]
+    graphdict = {}
+    for time in times:
+        end = start + block
+        graphdict[start]=0
+        if(time < end):
+            graphdict[start] += 1
+        else:
+            start = end
+    return graphdict
+        
+
 def get_files(requests):
     #get requested files with req
     requested_files = []
@@ -72,3 +88,6 @@ if __name__ == '__main__':
     # sort them by total requests descending
     #sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
     print(times)
+    for k,v in generate_graph_dict(times).items():
+        if(v > 0):
+            print str(k) + " " + str(v)
