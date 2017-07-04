@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt; plt.rcdefaults()
 from datetime import timedelta
 from collections import OrderedDict
 
+IVAL=5  #interval in minutes
+
 def process_log(log):
     requests = get_requests(log)
     #files = get_files(requests)
@@ -50,7 +52,7 @@ def convertStrToDatetime(dtstr):
     return datetime.datetime.strptime(dtstr, "%d/%b/%Y:%H:%M:%S +1000")
 
 def generate_graph_dict(times):
-    block = timedelta(minutes=15)
+    block = timedelta(minutes=IVAL)
     start = times[0]
     graphdict = OrderedDict()
     print start
