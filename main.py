@@ -8,8 +8,10 @@ import datetime
 import matplotlib.pyplot as plt; plt.rcdefaults()
 from datetime import timedelta
 from collections import OrderedDict
+import pandas as pd
 
 IVAL=5  #interval in minutes
+ROLL=5  #how many intervals to roll
 
 def process_log(log):
     requests = get_requests(log)
@@ -49,6 +51,7 @@ def get_times(requests):
 
 def convertStrToDatetime(dtstr):
     #03/Jul/2017:09:50:05 +1000
+    # we will drop the +1000, so graph will be in UTC
     return datetime.datetime.strptime(dtstr, "%d/%b/%Y:%H:%M:%S +1000")
 
 def generate_graph_dict(times):
@@ -73,6 +76,23 @@ def graph(graphdict):
     x = graphdict.keys()
     y = graphdict.values()
     plt.plot(x, y)
+    plt.show()
+
+def graphrolling(graphdict):
+    #put graphdict into a dataframe
+    data = { 'date':graphdict.keys(), 'count':graphdict.values() }
+    df = pd.DataFrame(data, columns = ['date', 'count'])
+    #print(df)
+    df.index = df['date']
+    del df['date']
+    print df
+
+    #create roll
+    dfb = pd.rolling_mean(df, ROLL)
+    print dfb
+
+    ax = dfb.plot()
+    plt.sca(ax)
     plt.show()
 
 def get_files(requests):
@@ -107,3 +127,4 @@ if __name__ == '__main__':
             print str(k) + " " + str(v)
             #pass
     graph(gd)
+    graphrolling(gd)
