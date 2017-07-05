@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt; plt.rcdefaults()
 from datetime import timedelta
 from collections import OrderedDict
 import pandas as pd
+from copy import deepcopy
+from matplotlib import dates
 
 IVAL=5  #interval in minutes
 ROLL=5  #how many intervals to roll
@@ -58,7 +60,7 @@ def generate_graph_dict(times):
     block = timedelta(minutes=IVAL)
     start = times[0]
     graphdict = OrderedDict()
-    print start
+    #print start
     for time in times:
         end = start + block
         if(time < end):
@@ -68,14 +70,44 @@ def generate_graph_dict(times):
                 graphdict[start] = 1
         else:
             start = end
-            print start
+            #print start
 
     return graphdict
+
+def graphcumulative(graphdict):
+    dates = graphdict.keys()
+    counts = graphdict.values()
+    cp = deepcopy(graphdict)
+    i = 1
+    for date in dates[1:]:
+        cp[date] = counts[i] + counts[i-1]
+        counts[i] = cp[date]
+        #print date
+        #print i
+        #print counts[i-1]
+        #print counts[i]
+        #print graphdict[date]
+        i += 1
+    graph(cp, 'Cumulative')
         
-def graph(graphdict):
+def graph(graphdict, title='Graph'):
     x = graphdict.keys()
     y = graphdict.values()
-    plt.plot(x, y)
+    #print graphdict.keys()
+    #plt.plot(x, y)
+
+    fig, ax = plt.subplots(1)
+
+    ax.xaxis_date()
+    xfmt = dates.DateFormatter('%d-%m-%y %H:%M')
+    ax.xaxis.set_major_formatter(xfmt)
+
+    locs, labels = plt.xticks()
+    plt.setp(labels, rotation=30, horizontalalignment='right')
+
+    plt.plot(x,y)
+    ax.set_title(title)
+
     plt.show()
 
 def graphrolling(graphdict):
@@ -85,13 +117,19 @@ def graphrolling(graphdict):
     #print(df)
     df.index = df['date']
     del df['date']
-    print df
+    #print df
 
     #create roll
     dfb = pd.rolling_mean(df, ROLL)
-    print dfb
+    #print dfb
 
     ax = dfb.plot()
+    ax.xaxis_date()
+    xfmt = dates.DateFormatter('%d-%m-%y %H:%M')
+    ax.xaxis.set_major_formatter(xfmt)
+    titlestr = "Rolling Average on " + str(ROLL) + " count roll"
+    ax.set_title(titlestr)
+
     plt.sca(ax)
     plt.show()
 
@@ -126,5 +164,7 @@ if __name__ == '__main__':
         if(v > 0):
             print str(k) + " " + str(v)
             #pass
-    graph(gd)
+    ivalstr = "On interval " + str(IVAL) + " minutes"
+    graph(gd, ivalstr)
     graphrolling(gd)
+    graphcumulative(gd)
