@@ -69,6 +69,9 @@ def generate_graph_dict(times):
             except:
                 graphdict[start] = 1
         else:
+            # if we haven't yet created a count for the time (eg if no entries in time range) set to 0, then seek start to next block
+            if start not in graphdict:
+                graphdict[start] = 0
             start = end
             #print start
 
