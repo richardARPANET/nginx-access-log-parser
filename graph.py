@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from datetime import timedelta
 from collections import OrderedDict
 import pandas as pd
@@ -5,17 +6,16 @@ from copy import deepcopy
 from matplotlib import dates
 import matplotlib.pyplot as plt; plt.rcdefaults()
 import datetime
-from dateutil.parser import parse
 
 from main import *
 
-IVAL=5  #interval in minutes
-ROLL=5  #how many intervals to roll
+#these are globals that determine interval to tally on and number of elements to create rolling average over
+#recommend setting to 5 for longer time range
+IVAL=2  #interval in minutes
+ROLL=2  #how many intervals to roll
 
 def process_log(log):
     requests = get_requests(log)
-    #files = get_files(requests)
-    #totals = file_occur(files)
     totals = get_times(requests)
     return totals
 
@@ -29,17 +29,21 @@ def get_times(requests):
     return timelist
 
 def convertStrToDatetime(dtstr):
-    #03/Jul/2017:09:50:05 +1000
-    # we will drop the +1000, so graph will be in UTC
-    #return datetime.datetime.strptime(dtstr, "%d/%b/%Y:%H:%M:%S +")
-    print dtstr
-    return parse(dtstr)
+    # we will drop the timezone
+    return datetime.datetime.strptime(dtstr[:-6], "%d/%b/%Y:%H:%M:%S")
 
 def generate_graph_dict(times):
+    """
+    param list of times, returned from process_log in this file
+    returns ordered dictionary of form { time_slice_start : request_count }
+    """
+
+    #block is the amount of time that we tally over, set with IVAL global
     block = timedelta(minutes=IVAL)
     start = times[0]
     graphdict = OrderedDict()
-    #print start
+
+    # iterate through all times and tally up each request, if we reach end, move to next block
     for time in times:
         end = start + block
         if(time < end):
@@ -52,11 +56,14 @@ def generate_graph_dict(times):
             if start not in graphdict:
                 graphdict[start] = 0
             start = end
-            #print start
 
     return graphdict
 
 def graphcumulative(graphdict):
+    """
+    param graphdict returned from generate_graph_dict()
+    graph total number of requests over time
+    """
     dates = graphdict.keys()
     counts = graphdict.values()
     cp = deepcopy(graphdict)
@@ -64,20 +71,17 @@ def graphcumulative(graphdict):
     for date in dates[1:]:
         cp[date] = counts[i] + counts[i-1]
         counts[i] = cp[date]
-        #print date
-        #print i
-        #print counts[i-1]
-        #print counts[i]
-        #print graphdict[date]
         i += 1
     graph(cp, 'Cumulative')
 
 def graph(graphdict, title='Graph'):
+    """
+    param graphdict returned from generate_graph_dict()
+    basic graph of graphdict data
+    """
     x = graphdict.keys()
     y = graphdict.values()
-    #print graphdict.keys()
-    #plt.plot(x, y)
-    print type(x)
+
     fig, ax = plt.subplots(1)
 
     ax.xaxis_date()
@@ -93,17 +97,19 @@ def graph(graphdict, title='Graph'):
     plt.show()
 
 def graphrolling(graphdict):
+    """
+    param of ordered dictionary of form { time_slice_start : request_count } returned from generate_graph_dict()
+    displays a graph of the log with rolling average
+    """
     #put graphdict into a dataframe
     data = { 'date':graphdict.keys(), 'count':graphdict.values() }
     df = pd.DataFrame(data, columns = ['date', 'count'])
-    #print(df)
+
     df.index = df['date']
     del df['date']
-    #print df
 
     #create roll
     dfb = pd.rolling_mean(df, ROLL)
-    #print dfb
 
     ax = dfb.plot()
     ax.xaxis_date()
@@ -120,17 +126,13 @@ if __name__ == '__main__':
     #nginx access log, standard format
     log_file = open('example.log', 'r')
 
-    # return dict of files and total requests
+    # return list of times
     times = process_log(log_file)
-    # sort them by total requests descending
-    #sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
-    #print(times)
+    # tally requests in each time slice
     gd = generate_graph_dict(times)
-    for k,v in gd.items():
-        if(v > 0):
-            print(str(k) + " " + str(v))
-            #pass
+
     ivalstr = "On interval " + str(IVAL) + " minutes"
+
     graph(gd, ivalstr)
     graphrolling(gd)
     graphcumulative(gd)
