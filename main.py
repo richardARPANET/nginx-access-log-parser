@@ -57,3 +57,5 @@ if __name__ == '__main__':
     # sort them by total requests descending
     sorted_by_count = sorted(urls_with_counts.items(), key=itemgetter(1), reverse=True)
     print(sorted_by_count)
+
+
